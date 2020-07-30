@@ -24,8 +24,8 @@ public:
 	bool RemoveLast();
 	bool Remove(T value);
 	void Clear();
-	bool Contains();
-	std::unique_ptr<Node<T>> Search(T value);
+	bool Contains(T value);
+	Node<T>* Search(T value);
 	size_t GetCount() const;
 };
 
@@ -33,16 +33,18 @@ public:
 template <typename T>
 void LinkedList<T>::AddFirst(T value)
 {
-	if (head == nullptr)
-	{
-		head = std::make_unique<Node<T>>(value);
-		tail = head.get();
-
-		return;
-	}
-
 	std::unique_ptr<Node<T>> nodeToInsert = std::make_unique<Node<T>>(value);
 
+	if (head == nullptr)
+	{
+		head = std::move(nodeToInsert);
+		tail = head.get();
+	}
+	else
+	{
+		nodeToInsert->next = std::move(head);
+		head = std::move(nodeToInsert);
+	}
 
 	Count++;
 }
@@ -50,7 +52,20 @@ void LinkedList<T>::AddFirst(T value)
 template <typename T>
 void LinkedList<T>::AddLast(T value)
 {
+	auto nodeToInsert = std::make_unique<Node<T>>(value);
 
+	if (head == nullptr)
+	{
+		head = std::move(nodeToInsert);
+		tail = head.get();
+	}
+	else
+	{
+		tail->next = std::move(nodeToInsert);
+		tail = tail->next.get();
+	}
+
+	Count++;
 }
 
 template <typename T>
@@ -62,7 +77,10 @@ void LinkedList<T>::AddBefore(T value, std::unique_ptr<Node<T>> item)
 template <typename T>
 void LinkedList<T>::AddAfter(T value, std::unique_ptr<Node<T>> item)
 {
-
+	auto result = Search(item->value);
+	auto valueToBeInserted = std::make_unique<Node<T>>(value);
+	valueToBeInserted->next = std::move(result->next);
+	//Finish up
 }
 
 template <typename T>
@@ -86,19 +104,41 @@ bool LinkedList<T>::Remove(T value)
 template <typename T>
 void LinkedList<T>::Clear()
 {
-
+	head = {};
+	tail = {};
+	Count = 0;
 }
 
-template <typename T>
-bool LinkedList<T>::Contains()
-{
-	return false;
-}
 
 template <typename T>
-std::unique_ptr<Node<T>> LinkedList<T>::Search(T value)
+Node<T>* LinkedList<T>::Search(T value)
 {
+	auto node = head.get();
+
+	while (node)
+	{
+		if (node->value == value)
+		{
+			return node;
+		}
+
+		node = node->next.get();
+	}
+
 	return nullptr;
+}
+
+
+template <typename T>
+bool LinkedList<T>::Contains(T value)
+{
+	auto result = Search(value);
+	if (result)
+	{
+		return true;
+	}
+
+	return false;
 }
 
 template <typename T>
