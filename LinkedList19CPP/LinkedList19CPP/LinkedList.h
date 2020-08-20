@@ -18,8 +18,8 @@ public:
 
 	void AddFirst(T value);
 	void AddLast(T value);
-	void AddBefore(T value, std::unique_ptr<Node<T>> item);
-	void AddAfter(T value, std::unique_ptr<Node<T>> item);
+	bool AddBefore(T value, Node<T>* item);
+	bool AddAfter(T value, Node<T>* item);
 	bool RemoveFirst();
 	bool RemoveLast();
 	bool Remove(T value);
@@ -69,18 +69,58 @@ void LinkedList<T>::AddLast(T value)
 }
 
 template <typename T>
-void LinkedList<T>::AddBefore(T value, std::unique_ptr<Node<T>> item)
+bool LinkedList<T>::AddBefore(T value, Node<T>* item)
 {
+	if (item == head.get())
+	{
+		AddFirst(value);
+		return true;
+	}
+
+	auto curr = head.get();
+
+	while (curr && curr->next.get() != item)
+	{
+		curr = curr->next.get();
+	}
+
+	if (curr == nullptr)
+	{
+		return false;
+	}
+
+	auto valueToBeInserted = std::make_unique<Node<T>>(value);
+	valueToBeInserted->next = std::move(curr->next);
+	curr->next = std::move(valueToBeInserted);
+
+	Count++;
+	return true;
 
 }
 
 template <typename T>
-void LinkedList<T>::AddAfter(T value, std::unique_ptr<Node<T>> item)
+bool LinkedList<T>::AddAfter(T value, Node<T>* item)
 {
 	auto result = Search(item->value);
+	if (result == nullptr)
+	{
+		return false;
+	}
+
+	if (item == tail)
+	{
+		AddLast(value);
+		return true;
+	}
+
 	auto valueToBeInserted = std::make_unique<Node<T>>(value);
 	valueToBeInserted->next = std::move(result->next);
+	result->next = std::move(valueToBeInserted);
+
+
 	//Finish up
+	Count++;
+	return true;
 }
 
 template <typename T>

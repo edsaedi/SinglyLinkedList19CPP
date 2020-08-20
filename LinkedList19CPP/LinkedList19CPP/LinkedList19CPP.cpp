@@ -16,7 +16,10 @@ int main()
 	linkedList.AddLast(input);
 	linkedList.AddLast(input2);
 
-	auto result = linkedList.Search(input2);
+	auto result = linkedList.Search(input);
+
+	linkedList.AddBefore("Feet", result);
+	linkedList.AddAfter("Feet", result);
 
 	return 0;
 }
